@@ -1,18 +1,20 @@
-import { Component } from '@angular/core';
-import { AuthService } from '../../services/auth.service';
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.scss']
 })
-export class HomeComponent {
-  constructor(private authService: AuthService, private router: Router) {}
+export class HomeComponent implements OnInit {
 
-  /**
-   * Calls the AuthService to log out the user.
-   */
+  constructor(private authService: AuthService, private router: Router) { }
+
+  ngOnInit(): void {
+    // Additional logic can be added here, e.g., checking authentication status
+  }
+
   logout(): void {
     this.authService.logout();
   }
