@@ -1,8 +1,8 @@
 export interface User {
-  id: number;
+  id?: number;
   username: string;
   email?: string;
-  role?: string;
+  token?: string;
 }
 
 export interface LoginRequest {
@@ -12,7 +12,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   success: boolean;
-  token?: string;
+  message: string;
   user?: User;
-  message?: string;
+  token?: string;
 }

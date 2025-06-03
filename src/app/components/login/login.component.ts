@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -10,71 +11,63 @@ import { AuthService } from '../../services/auth.service';
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
-  isLoading = false;
-  errorMessage = '';
-  showPassword = false;
+  loading = false;
+  submitted = false;
+  error = '';
+  returnUrl: string = '';
 
   constructor(
     private formBuilder: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {}
-
-  ngOnInit(): void {
-    // Redirect if already authenticated
-    if (this.authService.isAuthenticated()) {
+    private route: ActivatedRoute,
+    private router: Router,
+    private authService: AuthService
+  ) {
+    // Redirect to home if already logged in
+    if (this.authService.currentUserValue) {
       this.router.navigate(['/home']);
     }
-
-    this.initializeForm();
   }
 
-  private initializeForm(): void {
+  ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+
+    // Get return url from route parameters or default to '/home'
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
+  }
+
+  // Convenience getter for easy access to form fields
+  get f() { 
+    return this.loginForm.controls; 
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.isLoading = true;
-      this.errorMessage = '';
+    this.submitted = true;
+    this.error = '';
 
-      const credentials = this.loginForm.value;
+    // Stop if form is invalid
+    if (this.loginForm.invalid) {
+      return;
+    }
 
-      this.authService.login(credentials).subscribe({
+    this.loading = true;
+    this.authService.login(this.loginForm.value)
+      .pipe(first())
+      .subscribe({
         next: (response) => {
-          this.isLoading = false;
           if (response.success) {
-            this.router.navigate(['/home']);
+            this.router.navigate([this.returnUrl]);
           } else {
-            this.errorMessage = response.message || 'Login failed. Please try again.';
+            this.error = response.message || 'Login failed';
+            this.loading = false;
           }
         },
         error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = error.error?.message || 'An error occurred. Please try again.';
-          console.error('Login error:', error);
+          this.error = error.message || 'Login failed. Please try again.';
+          this.loading = false;
         }
       });
-    } else {
-      this.markFormGroupTouched();
-    }
   }
-
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
-  }
-
-  private markFormGroupTouched(): void {
-    Object.keys(this.loginForm.controls).forEach(key => {
-      const control = this.loginForm.get(key);
-      control?.markAsTouched();
-    });
-  }
-
-  // Getter methods for easy access in template
-  get username() { return this.loginForm.get('username'); }
-  get password() { return this.loginForm.get('password'); }
 }

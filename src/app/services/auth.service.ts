@@ -1,64 +1,73 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { ApiService } from './api.service';
-import { LoginRequest, LoginResponse, User } from '../models/user.model';
+import { User, LoginRequest, LoginResponse } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  private currentUserSubject: BehaviorSubject<User | null>;
+  public currentUser: Observable<User | null>;
+  private apiUrl = 'http://localhost:3000/api'; // Replace with your backend API URL
 
   constructor(
-    private apiService: ApiService,
+    private http: HttpClient,
     private router: Router
   ) {
-    // Check if user is already logged in on service initialization
-    this.checkAuthStatus();
+    this.currentUserSubject = new BehaviorSubject<User | null>(
+      JSON.parse(localStorage.getItem('currentUser') || 'null')
+    );
+    this.currentUser = this.currentUserSubject.asObservable();
+  }
+
+  public get currentUserValue(): User | null {
+    return this.currentUserSubject.value;
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.apiService.login(credentials).pipe(
-      tap(response => {
-        if (response.success && response.token && response.user) {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('user', JSON.stringify(response.user));
-          this.currentUserSubject.next(response.user);
-          this.isAuthenticatedSubject.next(true);
-        }
-      })
-    );
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials)
+      .pipe(
+        map(response => {
+          if (response.success && response.user && response.token) {
+            // Store user details and jwt token in local storage
+            const user: User = {
+              ...response.user,
+              token: response.token
+            };
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            this.currentUserSubject.next(user);
+          }
+          return response;
+        }),
+        catchError(this.handleError)
+      );
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    // Remove user from local storage and set current user to null
+    localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
-    this.isAuthenticatedSubject.next(false);
     this.router.navigate(['/login']);
   }
 
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+  isLoggedIn(): boolean {
+    return !!this.currentUserValue;
   }
 
-  getCurrentUser(): User | null {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
-  }
-
-  private checkAuthStatus(): void {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'An unknown error occurred';
     
-    if (token && userStr) {
-      const user = JSON.parse(userStr);
-      this.currentUserSubject.next(user);
-      this.isAuthenticatedSubject.next(true);
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = error.error.message;
+    } else {
+      // Server-side error
+      errorMessage = error.error?.message || `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
+    
+    return throwError(() => new Error(errorMessage));
   }
 }

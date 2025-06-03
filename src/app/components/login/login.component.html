@@ -1,76 +1,64 @@
 <div class="login-container">
   <div class="login-card">
     <div class="login-header">
-      <h1 class="login-title">Asset Management System</h1>
-      <p class="login-subtitle">Please sign in to your account</p>
+      <h2>Asset Management System</h2>
+      <p>Please sign in to your account</p>
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Error Alert -->
+      <div *ngIf="error" class="alert alert-error">
+        <i class="icon-error">⚠</i>
+        {{ error }}
+      </div>
+
       <!-- Username Field -->
       <div class="form-group">
-        <label for="username" class="form-label">Username</label>
+        <label for="username">Username</label>
         <input
           type="text"
           id="username"
           formControlName="username"
-          class="form-input"
-          [class.error]="username?.invalid && username?.touched"
-          placeholder="Enter your username">
-        <div class="error-message" *ngIf="username?.invalid && username?.touched">
-          <span *ngIf="username?.errors?.['required']">Username is required</span>
-          <span *ngIf="username?.errors?.['minlength']">Username must be at least 3 characters</span>
+          class="form-control"
+          [class.error]="submitted && f['username'].errors"
+          placeholder="Enter your username"
+        />
+        <div *ngIf="submitted && f['username'].errors" class="field-error">
+          <span *ngIf="f['username'].errors['required']">Username is required</span>
+          <span *ngIf="f['username'].errors['minlength']">Username must be at least 3 characters</span>
         </div>
       </div>
 
       <!-- Password Field -->
       <div class="form-group">
-        <label for="password" class="form-label">Password</label>
-        <div class="password-input-container">
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            id="password"
-            formControlName="password"
-            class="form-input"
-            [class.error]="password?.invalid && password?.touched"
-            placeholder="Enter your password">
-          <button
-            type="button"
-            class="password-toggle"
-            (click)="togglePasswordVisibility()">
-            <span class="password-toggle-icon">
-              {{ showPassword ? '🙈' : '👁️' }}
-            </span>
-          </button>
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          class="form-control"
+          [class.error]="submitted && f['password'].errors"
+          placeholder="Enter your password"
+        />
+        <div *ngIf="submitted && f['password'].errors" class="field-error">
+          <span *ngIf="f['password'].errors['required']">Password is required</span>
+          <span *ngIf="f['password'].errors['minlength']">Password must be at least 6 characters</span>
         </div>
-        <div class="error-message" *ngIf="password?.invalid && password?.touched">
-          <span *ngIf="password?.errors?.['required']">Password is required</span>
-          <span *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters</span>
-        </div>
-      </div>
-
-      <!-- Error Message -->
-      <div class="error-message global-error" *ngIf="errorMessage">
-        {{ errorMessage }}
       </div>
 
       <!-- Submit Button -->
       <button
         type="submit"
-        class="login-button"
-        [disabled]="isLoading"
-        [class.loading]="isLoading">
-        <span *ngIf="!isLoading">Sign In</span>
-        <span *ngIf="isLoading" class="loading-text">
-          <span class="loading-spinner"></span>
-          Signing in...
-        </span>
+        class="btn btn-primary"
+        [disabled]="loading"
+      >
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Signing in...' : 'Sign In' }}
       </button>
     </form>
 
     <div class="login-footer">
-      <p class="forgot-password">
-        <a href="#" class="forgot-link">Forgot your password?</a>
-      </p>
+      <p>Don't have an account? <a href="#" class="link">Contact Administrator</a></p>
     </div>
   </div>
 </div>
