@@ -1,0 +1,84 @@
+<div class="home-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1 class="app-title">Asset Management System</h1>
+      <div class="user-section">
+        <span class="welcome-text">Welcome, {{ currentUser?.username }}!</span>
+        <button class="logout-button" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-header">
+      <h2 class="page-title">Dashboard</h2>
+      <p class="page-subtitle">Manage your assets efficiently</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="loading-spinner-large"></div>
+      <p class="loading-text">Loading assets...</p>
+    </div>
+
+    <!-- Assets List -->
+    <div *ngIf="!isLoading" class="assets-section">
+      <div class="section-header">
+        <h3 class="section-title">Recent Assets</h3>
+        <button class="add-asset-button">+ Add Asset</button>
+      </div>
+
+      <div class="assets-grid">
+        <div *ngFor="let asset of assets" class="asset-card">
+          <div class="asset-header">
+            <h4 class="asset-name">{{ asset.name }}</h4>
+            <span class="asset-status" [class]="'status-' + asset.status.toLowerCase()">
+              {{ asset.status }}
+            </span>
+          </div>
+          <div class="asset-details">
+            <p class="asset-type">
+              <strong>Type:</strong> {{ asset.type }}
+            </p>
+            <p class="asset-location">
+              <strong>Location:</strong> {{ asset.location }}
+            </p>
+          </div>
+          <div class="asset-actions">
+            <button class="action-button edit">Edit</button>
+            <button class="action-button view">View</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📱</div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ assets.length }}</h3>
+            <p class="stat-label">Total Assets</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ (assets | json).split('"Active"').length - 1 }}</h3>
+            <p class="stat-label">Active Assets</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔧</div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ (assets | json).split('"Maintenance"').length - 1 }}</h3>
+            <p class="stat-label">In Maintenance</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
