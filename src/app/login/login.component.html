@@ -1,15 +1,15 @@
 <div class="login-container">
   <h2>Login</h2>
-  <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-    <div class="form-group">
+  <form (submit)="onLogin(); $event.preventDefault()">
+    <div>
       <label for="username">Username</label>
-      <input [(ngModel)]="username" name="username" id="username" type="text" required />
+      <input id="username" type="text" [(ngModel)]="username" name="username" required />
     </div>
-    <div class="form-group">
+    <div>
       <label for="password">Password</label>
-      <input [(ngModel)]="password" name="password" id="password" type="password" required />
+      <input id="password" type="password" [(ngModel)]="password" name="password" required />
     </div>
-    <button type="submit" [disabled]="loginForm.invalid">Login</button>
-    <div class="error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <button type="submit">Login</button>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
   </form>
 </div>
