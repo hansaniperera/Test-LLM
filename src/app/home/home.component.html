@@ -1,0 +1,18 @@
+<div class="home-container">
+  <div class="header">
+    <h1>Welcome to the Asset Management System!</h1>
+    <button class="btn btn-logout" (click)="logout()" [disabled]="loggingOut">
+      <span *ngIf="loggingOut" class="spinner-border spinner-border-sm mr-1"></span>
+      Logout
+    </button>
+  </div>
+  <div class="content">
+    <p>This is your home page where you can access all the system's features.</p>
+    <ul>
+      <li>View Assets</li>
+      <li>Manage Users</li>
+      <li>Generate Reports</li>
+      <li>Settings</li>
+    </ul>
+  </div>
+</div>
