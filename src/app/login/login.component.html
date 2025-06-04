@@ -1,0 +1,23 @@
+<div class="login-container">
+  <h2>Login to Asset Management</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label>Username</label>
+      <input type="text" formControlName="username" />
+      <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error">
+        Username is required (min 3 characters).
+      </div>
+    </div>
+
+    <div>
+      <label>Password</label>
+      <input type="password" formControlName="password" />
+      <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error">
+        Password is required (min 6 characters).
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+    <button type="submit" [disabled]="loginForm.invalid">Login</button>
+  </form>
+</div>
